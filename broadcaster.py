@@ -18,8 +18,8 @@ class Broadcaster(IBroadcaster):
     async def send(self, message: IMessage) -> bool:
         
         group: list = self._group.get_list()
+        
         if message.channel_id in group:
-            # await message.delete()
             
             for grouped_channel in group:
                 
@@ -29,9 +29,19 @@ class Broadcaster(IBroadcaster):
                                         description=message.guild,
                                         color=message.color)
                 
+                embed.set_thumbnail(url=message.user_avatar)
+                
                 embed.add_field(name="ㅤ", value=message.content, inline=False)
                 
-                await channel.send(embed=embed)
+                embed.set_footer(text=message.data)
+                
+                if message.channel_id != grouped_channel:
+                    
+                    await channel.send(embed=embed)
+                
+                else:
+                
+                    await channel.send(message.mentions, embed=embed)
             
             return True
         
