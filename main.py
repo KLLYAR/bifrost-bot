@@ -1,7 +1,10 @@
 import os
 from dotenv import load_dotenv
 import discord
-import random
+
+from group import Group
+from broadcaster import Broadcaster
+from message import Message
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -11,34 +14,22 @@ client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
     print(f"logado como {client.user}!")
-    
 
-guilds_group = {"test": [1042960126837006366, 1042960076304031876]}    
+ads_group = Group()
+ads_group.add_channel(1042960126837006366)
+ads_group.add_channel(1042960076304031876)
+
+ads_broadcaster = Broadcaster(client, ads_group)
 
 @client.event
 async def on_message(message):
     
     if message.author == client.user:
         return
-    
-    message_cache = {"user": f"{message.author.name}#{message.author.discriminator}",
-                     "guild": f"From {message.guild.name}",
-                     "content": f"```{message.content}```",
-                     "color": int(message.author.discriminator)}
-    
-    if message.channel.name == "geral":
-        await message.delete()
-        
-        for general_channel in guilds_group["test"]:
-            channel = client.get_channel(general_channel)
-            embedVar = discord.Embed(title= message_cache["user"],
-                                    description=message_cache["guild"],
-                                    color=message_cache["color"])
-            
-            embedVar.add_field(name="ㅤ", value=message_cache["content"], inline=False)
-            
-            await channel.send(embed=embedVar)
 
+    if(await ads_broadcaster.send(Message(message))): 
+        await message.delete() # Slow
+    
 if __name__ == "__main__":
     load_dotenv()
     client.run(os.getenv('TOKEN'))
