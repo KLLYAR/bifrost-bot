@@ -5,6 +5,7 @@ from message import Message
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.guilds = True
 
 class CustomClient(discord.Client):
     
@@ -13,11 +14,8 @@ class CustomClient(discord.Client):
         self._setup()
         
     def _setup(self):
-        ads_group = Group()
-        ads_group.add_channel(1043063977070047272)
-        ads_group.add_channel(1042960076304031876)
-
-        self.ads_broadcaster = Broadcaster(self, ads_group)
+        self._dark_cafe = Group()
+        self.ads_broadcaster = Broadcaster(self, self._dark_cafe)
         
     async def on_ready(self):
         print(f'{self.user} has connected to Discord!')
@@ -29,3 +27,7 @@ class CustomClient(discord.Client):
 
         if(await self.ads_broadcaster.send(Message(message))): 
             await message.delete() # Slow
+            
+    async def on_guild_channel_delete(self, channel):
+        if channel.id in self._ads_group:
+            self._ads_group.remove_channel(channel.id)
