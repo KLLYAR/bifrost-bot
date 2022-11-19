@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-from random import randrange
 from abc import ABC, abstractmethod
 import json
 
@@ -11,7 +9,10 @@ from aio_pika.abc import AbstractIncomingMessage
 
 
 class IReceiver(ABC):
-    pass
+
+    @abstractmethod
+    async def start(self):
+        pass
 
 class Receiver(IReceiver):
     

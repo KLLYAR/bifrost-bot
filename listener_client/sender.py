@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
 
 from aio_pika import Message, connect
-import asyncio
 
 class ISender(ABC):
-    pass
+    
+    @abstractmethod
+    async def send(self, data):
+        pass
 
 class Sender(ISender):
 

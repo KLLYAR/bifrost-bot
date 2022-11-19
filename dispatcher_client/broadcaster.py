@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import discord
-from message import IMessage
 from group import IGroup
 from embed import CustomEmbed
 import discord
@@ -8,7 +7,7 @@ import discord
 class IBroadcaster(ABC):
     
     @abstractmethod
-    def send(self, message: IMessage):
+    def send(self, message: dict):
         pass
     
 class Broadcaster(IBroadcaster):
@@ -26,9 +25,9 @@ class Broadcaster(IBroadcaster):
             for grouped_channel in group:
                 
                 channel = self._client.get_channel(grouped_channel)
-                if(message["channel_id"] == channel.id):
-                    m = await channel.fetch_message(message["message_id"])
-                    await m.delete()
+                # if(message["channel_id"] == channel.id):
+                #     m = await channel.fetch_message(message["message_id"])
+                #     await m.delete()
                 
                 embed = CustomEmbed.create_embed(message=message)
                 
@@ -37,8 +36,8 @@ class Broadcaster(IBroadcaster):
                     await channel.send(embed=embed)
                 
                 else:
-                
-                    await channel.send(message["mentions"], embed=embed)
+                    pass
+                    # await channel.send(message["mentions"], embed=embed)
             
             return True
         
