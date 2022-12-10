@@ -5,7 +5,7 @@ from broadcaster import Broadcaster
 from receiver import Receiver
 import asyncio
 
-class Custom2Client(discord.Client):
+class DispatcherClient(discord.Client):
     
     def __init__(self) -> None:
         

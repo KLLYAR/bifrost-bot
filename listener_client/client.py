@@ -1,9 +1,9 @@
 import discord
-from message import Message as MS
+from message_formater import MessageFormatter as MS
 from sender import *
 import json
 
-class CustomClient(discord.Client):
+class ListenerClient(discord.Client):
     
     def __init__(self, sender: ISender) -> None:
         
