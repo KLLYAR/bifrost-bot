@@ -1,9 +1,9 @@
-import discord
+import nextcord
 
 class CustomEmbed():
 
     def create_embed(message):
-        embed = discord.Embed(
+        embed = nextcord.Embed(
             title=message["username"],
             description=message["guild"],
             color=message["color"])

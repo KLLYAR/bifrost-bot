@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
-import discord
-from group import IGroup
+import nextcord
 from embed import CustomEmbed
-import discord
+import nextcord
 
 class IBroadcaster(ABC):
     
@@ -12,37 +11,29 @@ class IBroadcaster(ABC):
     
 class Broadcaster(IBroadcaster):
     
-    def __init__(self, client: discord.Client, group: IGroup) -> None:
+    def __init__(self, client) -> None:
         self._client = client
-        self._group = group
     
     async def send(self, message: dict) -> bool:
         
-        group: list = self._group.get_list()
+        channel_group_manager = self._client.get_channel_group_manager()
+        has_channel, token = channel_group_manager.has_channel(message["channel_id"])
+        channel_groups = channel_group_manager.get_channel_groups()
         
-        if message["channel_id"] in group:
-            
-            for grouped_channel in group:
+        if has_channel:
+        
+            for grouped_channel in channel_groups[token]:
                 
                 channel = self._client.get_channel(grouped_channel)
-                # if(message["channel_id"] == channel.id):
-                #     m = await channel.fetch_message(message["message_id"])
-                #     await m.delete()
                 
                 embed = CustomEmbed.create_embed(message=message)
                 
                 if message["channel_id"] != grouped_channel:
                     
                     await channel.send(embed=embed)
-                
-                else:
-                    pass
-                    # await channel.send(message["mentions"], embed=embed)
-            
+
             return True
         
         else:
-            
-            print(message)
             
             return False

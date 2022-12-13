@@ -10,7 +10,7 @@ class ISender(ABC):
 
 class Sender(ISender):
 
-    async def send(self, data):
+    async def send(self, queue_name, data):
         
         connection = await connect("amqp://guest:guest@localhost/")
 
@@ -18,7 +18,7 @@ class Sender(ISender):
             
             channel = await connection.channel()
 
-            queue = await channel.declare_queue("hello")
+            queue = await channel.declare_queue(queue_name)
 
             await channel.default_exchange.publish(
                 message=Message(data.encode('utf-8')),
