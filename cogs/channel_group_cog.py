@@ -10,38 +10,60 @@ from message_formatter import MessageFormatter as MS
 from client import BotClient
 from typing import Optional
 import secrets
+import requests
 
 class ChannelGroupCog(commands.Cog):
     
     def __init__(self, client: BotClient):
         self.client = client
         
+        
+    @nextcord.slash_command(name="list")
+    async def list_public_groups(self, interaction: Interaction) -> None:    
+        request = requests.get("http://127.0.0.1:8000/group/")
+        
+        if request.status_code == 200:
+            
+            await interaction.response.send_message({"message": request.text}, ephemeral=True)
+    
     @nextcord.slash_command(name="register")
     async def register_group(self, interaction: Interaction, name: str, description: str) -> None:
         
-        channel_group_manager = self.client.get_channel_group_manager()
-        has_channel, token = channel_group_manager.has_channel(interaction.channel.id)
-        if has_channel:
+        
+        request = requests.post("http://127.0.0.1:8000/group/", 
+                                {"name": name,
+                                 "description": description,
+                                 "user_id": interaction.user.id,
+                                 "is_owner": 1,
+                                 "channel_id": interaction.channel.id})
+        
+        print(request.text)
+        print(request.status_code)
+        response_data = request.json()
+        
+        if request.status_code == 201:
             
-            await interaction.response.send_message(
-                f"Cannot register another group. This channel already is in a group", 
-                ephemeral=True
-            )
-            return
+            token = response_data["token"]
+            
+            self.client.get_async_receiver_task_manager().add_task(
+                self.client.loop, 
+                Receiver(token, Broadcaster(self.client)))
+            
+            self.client.get_channel_group_manager().add_channel(
+                token, 
+                interaction.channel.id)
         
-        new_token = secrets.token_hex()
+            await interaction.response.send_message(f"Group created!. Your group token is {token}", ephemeral=True)
+
         
-        self.client.get_async_receiver_task_manager().add_task(
-            self.client.loop, 
-            Receiver(new_token, Broadcaster(self.client))
-        )
+        elif request.status_code == 400:
+            
+            await interaction.response.send_message(response_data["message"], ephemeral=True)
         
-        self.client.get_channel_group_manager().add_channel(
-            new_token, 
-            interaction.channel.id
-        )
+        else:
+            
+            await interaction.response.send_message(response_data["message"], ephemeral=True)
         
-        await interaction.response.send_message(f"Group created!. Your token is {new_token}", ephemeral=True)
     
     @nextcord.slash_command(name="enter")
     async def enter(self, interaction: Interaction, token: str):
